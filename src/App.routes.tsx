@@ -1,12 +1,12 @@
 import { Route, Routes } from "react-router-dom";
 import App from "./App";
-import CatDetail from "./Cat";
+import CatPage from "./cats/Cat";
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<App></App>} />
-      <Route path="cats/:catId" element={<CatDetail></CatDetail>} />
+      <Route path="cats/:catId" element={<CatPage></CatPage>} />
     </Routes>
   );
 }

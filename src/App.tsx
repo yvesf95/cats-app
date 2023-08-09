@@ -4,12 +4,15 @@ import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/esm/Button";
 import CatsClient from "./api/cats-client";
-import CatCard from "./components/CatCard";
+import CatCard from "./common/components/CatCard";
+import { Link, useSearchParams } from "react-router-dom";
+import { Col } from "react-bootstrap";
 
 const limit = 10;
 
 function App() {
-  const [breed, setBreed] = useState("");
+  const [searchParams] = useSearchParams();
+  const [breed, setBreed] = useState(searchParams.get("breed") || "");
   const breedsQuery = useQuery({
     queryKey: ["breeds"],
     queryFn: CatsClient.getBreeds,
@@ -43,13 +46,14 @@ function App() {
   }
 
   return (
-    <Container>
+    <Container className="my-4">
       <h1>Cats Browser</h1>
 
       <div className="mt-3">
         <label htmlFor="select-breed">Breed</label>
         <Form.Select
           id="select-breed"
+          value={breed}
           onChange={(event) => setBreed(event.target.value)}
           className="mt-2"
         >
@@ -69,12 +73,13 @@ function App() {
       <div className="grid gap-3 mt-3">
         {catsQuery.data?.pages.map((group) =>
           group.data?.map((cat) => (
-            <CatCard
-              key={cat.id}
-              url={cat.url}
-              gotoUrl={`/cats/${cat.id}`}
-              className="g-col-6 g-col-sm-4 g-col-lg-3 g-col-xl-2 px-0"
-            ></CatCard>
+            <Col className="g-col-6 g-col-md-4 g-col-lg-3">
+              <CatCard key={cat.id} url={cat.url}>
+                <Link to={`/cats/${cat.id}`} className="btn btn-primary w-100">
+                  View details
+                </Link>
+              </CatCard>
+            </Col>
           ))
         )}
       </div>
@@ -82,7 +87,7 @@ function App() {
       {catsQuery.hasNextPage && (
         <div className="py-3">
           <Button variant="success" onClick={() => catsQuery.fetchNextPage()}>
-            {catsQuery.isFetchingNextPage ? "Loading..." : "Load More"}
+            {catsQuery.isFetchingNextPage ? "Loading cats..." : "Load More"}
           </Button>
         </div>
       )}

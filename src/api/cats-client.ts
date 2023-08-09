@@ -1,16 +1,5 @@
 import axios from "axios";
-
-export type Breed = {
-  id: string;
-  name: string;
-};
-
-export type CatImage = {
-  id: string;
-  url: string;
-  width: number;
-  height: number;
-};
+import { Breed, CatDetails, CatImage } from "./cat.types";
 
 export type GetCatsByBreedOptions = {
   imageSize?: ImageSize;
@@ -41,9 +30,16 @@ async function getCatsByBreed(breed: string, options?: GetCatsByBreedOptions) {
   return data;
 }
 
+async function getCatDetails(imageId: string) {
+  const url = `${BASE_URL}/v1/images/${imageId}`;
+  const { data } = await axios.get<CatDetails>(url);
+  return data;
+}
+
 const CatsClient = {
   getBreeds,
-  getCatsByBreed: getCatsByBreed,
+  getCatsByBreed,
+  getCatDetails,
 };
 
 export default CatsClient;
