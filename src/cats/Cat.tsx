@@ -27,16 +27,14 @@ export default function CatPage() {
           </Link>
         </Card.Header>
         <Card.Img src={data?.url} style={{ objectFit: "cover" }}></Card.Img>
-        <Card.Body>
-          {breed && (
-            <Card.Text>
-              <h4>{breed.name}</h4>
-              <h5>Origin: {breed.origin}</h5>
-              <h6>{breed.temperament}</h6>
-              <p>{breed.description}</p>
-            </Card.Text>
-          )}
-        </Card.Body>
+        {breed && (
+          <Card.Body>
+            <h4>{breed.name}</h4>
+            <h5>Origin: {breed.origin}</h5>
+            <h6>{breed.temperament}</h6>
+            <p>{breed.description}</p>
+          </Card.Body>
+        )}
       </Card>
     </Container>
   );

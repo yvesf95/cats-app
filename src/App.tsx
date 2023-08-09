@@ -1,12 +1,13 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
+import Card from "react-bootstrap/Card";
 import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
+import Image from "react-bootstrap/Image";
 import Button from "react-bootstrap/esm/Button";
-import CatsClient from "./api/cats-client";
-import CatCard from "./common/components/CatCard";
+import Ratio from "react-bootstrap/esm/Ratio";
 import { Link, useSearchParams } from "react-router-dom";
-import { Col } from "react-bootstrap";
+import CatsClient from "./api/cats-client";
 
 const limit = 10;
 
@@ -89,13 +90,16 @@ function App() {
 
       <div className="grid gap-3 mt-3">
         {cats?.map((cat) => (
-          <Col key={cat.id} className="g-col-6 g-col-md-4 g-col-lg-3">
-            <CatCard url={cat.url}>
+          <Card className={"g-col-6 g-col-md-4 g-col-lg-3 overflow-hidden"}>
+            <Ratio aspectRatio="1x1">
+              <Image src={cat.url} className="object-fit-cover"></Image>
+            </Ratio>
+            <Card.Body>
               <Link to={`/cats/${cat.id}`} className="btn btn-primary w-100">
                 View details
               </Link>
-            </CatCard>
-          </Col>
+            </Card.Body>
+          </Card>
         ))}
       </div>
 
