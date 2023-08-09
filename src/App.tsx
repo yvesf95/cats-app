@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/esm/Button";
@@ -21,12 +21,22 @@ function App() {
     refetchOnReconnect: false,
   });
 
+  const catsMapRef = useRef(new Map());
   const catsQuery = useInfiniteQuery({
     queryKey: ["cats", breed],
     queryFn: async ({ pageParam = 0 }) => {
       const options = { page: pageParam, limit };
       const data = await CatsClient.getCatsByBreed(breed, options);
-      if (data.length < limit) {
+
+      let newCatsCounter = 0;
+      for (const cat of data) {
+        if (!catsMapRef.current.has(cat.id)) {
+          catsMapRef.current.set(cat.id, cat);
+          newCatsCounter++;
+        }
+      }
+
+      if (newCatsCounter === 0) {
         return { data };
       }
       return { data, page: pageParam + 1 };
@@ -38,12 +48,18 @@ function App() {
     refetchOnReconnect: false,
   });
 
-  if (breedsQuery.status === "loading") {
-    return <h1>Loading...</h1>;
-  }
-  if (breedsQuery.status === "error") {
-    return <h1>{JSON.stringify(breedsQuery.error)}</h1>;
-  }
+  const distinctIds = new Map();
+  const cats =
+    catsQuery.data?.pages
+      .map((page) => page.data)
+      .flat()
+      .filter((cat) => {
+        const isUnique = !distinctIds.has(cat.id);
+        if (isUnique) {
+          distinctIds.set(cat.id, cat);
+        }
+        return isUnique;
+      }) || [];
 
   return (
     <Container className="my-4">
@@ -56,6 +72,9 @@ function App() {
           value={breed}
           onChange={(event) => setBreed(event.target.value)}
           className="mt-2"
+          disabled={
+            breedsQuery.status === "loading" || breedsQuery.status === "error"
+          }
         >
           <option key="select">Select breed</option>
           {breedsQuery.data?.map((breed) => (
@@ -66,22 +85,18 @@ function App() {
         </Form.Select>
       </div>
 
-      {(!catsQuery.data?.pages || catsQuery.data.pages.length === 0) && (
-        <h4 className="mt-3">No cats available.</h4>
-      )}
+      {cats?.length === 0 && <h4 className="mt-3">No cats available.</h4>}
 
       <div className="grid gap-3 mt-3">
-        {catsQuery.data?.pages.map((group) =>
-          group.data?.map((cat) => (
-            <Col className="g-col-6 g-col-md-4 g-col-lg-3">
-              <CatCard key={cat.id} url={cat.url}>
-                <Link to={`/cats/${cat.id}`} className="btn btn-primary w-100">
-                  View details
-                </Link>
-              </CatCard>
-            </Col>
-          ))
-        )}
+        {cats?.map((cat) => (
+          <Col key={cat.id} className="g-col-6 g-col-md-4 g-col-lg-3">
+            <CatCard url={cat.url}>
+              <Link to={`/cats/${cat.id}`} className="btn btn-primary w-100">
+                View details
+              </Link>
+            </CatCard>
+          </Col>
+        ))}
       </div>
 
       {catsQuery.hasNextPage && (
